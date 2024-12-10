@@ -32,6 +32,14 @@ pub fn derive(input: TokenStream) -> TokenStream {
                self.current_dir = Some(current_dir);
                self
            }
+           pub fn build(&mut self) -> Result<#name, Box<dyn std::error::Error>> {
+               Ok(#name {
+                   executable: self.executable.take().ok_or("executable is required")?,
+                   args: self.args.take().ok_or("args is required")?,
+                   env: self.env.take().ok_or("env is required")?,
+                   current_dir: self.current_dir.take().ok_or("current_dir is required")?,
+               })
+           }
         }
        impl #name {
            pub fn builder() -> #bident {
