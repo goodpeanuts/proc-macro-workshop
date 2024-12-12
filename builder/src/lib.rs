@@ -81,7 +81,7 @@ fn get_generic_inner_type<'a>(
 }
 
 /// parse `#[builder(each = "Value")]`, return `Value`
-fn get_ident_for_vec(field: &syn::Field) -> std::option::Option<syn::Ident> {
+fn get_ident_for_vec(field: &syn::Field) -> syn::Result<std::option::Option<syn::Ident>> {
     for attr in &field.attrs {
         if attr.path().is_ident("builder") {
             // parse builder
@@ -91,21 +91,24 @@ fn get_ident_for_vec(field: &syn::Field) -> std::option::Option<syn::Ident> {
                 // parse  `(`
                 if nested.path.is_ident("each") {
                     // parse each
-                    let value = nested.value()?; // parse =
-                    let ident: syn::LitStr = value.parse()?; // parse Value
+                    let value = nested.value()?; // parse `=`
+                    let ident: syn::LitStr = value.parse()?; // parse `Value`
                     result = Some(syn::Ident::new(ident.value().as_str(), ident.span()));
                     return Ok(());
+                } else {
+                    // let error_meta = attr.token
+                    return Err(syn::Error::new_spanned(
+                        nested.path,
+                        r#"expected `builder(each = "...")`"#,
+                    ));
                 }
-                Ok(())
-            });
-
+            })?;
             if result.is_some() {
-                return result;
+                return Ok(result);
             }
         }
     }
-
-    None
+    Ok(None)
 }
 
 /// provide builder function to construct Builder itself from other struct
@@ -117,17 +120,17 @@ fn generate_fn_builder_default(
         .iter()
         .map(|f| {
             let ident = &f.ident;
-            if get_ident_for_vec(f).is_some() {
-                quote::quote! {
+            if get_ident_for_vec(f)?.is_some() {
+                Ok(quote::quote! {
                     #ident: std::vec::Vec::new(),
-                }
+                })
             } else {
-                quote::quote! {
+                Ok(quote::quote! {
                     #ident: std::option::Option::None,
-                }
+                })
             }
         })
-        .collect::<Vec<_>>();
+        .collect::<syn::Result<Vec<_>>>()?;
     let builders = quote! {
         pub fn builder() -> #builder_ident {
             #builder_ident {
@@ -145,23 +148,23 @@ fn generate_builder_define(fields: &StructFields) -> syn::Result<proc_macro2::To
         .iter()
         .map(|f| {
             if let Some(inner_type) = get_generic_inner_type(&f.ty, "Option") {
-                quote::quote! {
+                Ok(quote::quote! {
                     std::option::Option<#inner_type>
-                }
-            } else if get_ident_for_vec(f).is_some() {
+                })
+            } else if get_ident_for_vec(f)?.is_some() {
                 // according to the test consuming, it can be sure that it is Vec
                 let origin_type = &f.ty;
-                quote::quote! {
+                Ok(quote::quote! {
                     #origin_type
-                }
+                })
             } else {
                 let origin_type = &f.ty;
-                quote::quote! {
+                Ok(quote::quote! {
                     std::option::Option<#origin_type>
-                }
+                })
             }
         })
-        .collect::<Vec<_>>();
+        .collect::<syn::Result<Vec<_>>>()?;
     let builders = quote! {
         #( #idents: #types ),*
     };
@@ -183,7 +186,7 @@ fn generate_builder_setter(fields: &StructFields) -> syn::Result<proc_macro2::To
                     self
                 }
             }
-        } else if let Some(ref marco_ident) = get_ident_for_vec(f) {
+        } else if let Some(ref marco_ident) = get_ident_for_vec(f)? {
             let inner_type = get_generic_inner_type(&f.ty, "Vec");
             let mut t = quote::quote! {
                 pub fn #marco_ident(&mut self, #marco_ident: #inner_type) -> &mut Self {
@@ -192,14 +195,12 @@ fn generate_builder_setter(fields: &StructFields) -> syn::Result<proc_macro2::To
                 }
             };
             if marco_ident != ident.as_ref().unwrap() {
-                t.extend(
-                    quote::quote! {
-                        pub fn #ident(&mut self, #ident: #ty) -> &mut Self {
-                            self.#ident = #ident.clone();
-                            self
-                        }
+                t.extend(quote::quote! {
+                    pub fn #ident(&mut self, #ident: #ty) -> &mut Self {
+                        self.#ident = #ident.clone();
+                        self
                     }
-                );
+                });
             }
             t
         } else {
@@ -224,10 +225,10 @@ fn generate_fn_build(
     fields: &StructFields,
 ) -> syn::Result<proc_macro2::TokenStream> {
     let mut define_content = proc_macro2::TokenStream::new();
-    for f in fields{
+    for f in fields {
         let ident = &f.ident;
         let ty = &f.ty;
-        define_content.extend(if get_generic_inner_type(ty, "Option").is_some() || get_ident_for_vec(f).is_some(){
+        define_content.extend(if get_generic_inner_type(ty, "Option").is_some() || get_ident_for_vec(f)?.is_some(){
             quote::quote! { #ident: self.#ident.clone(), }
         } else {
             quote::quote! { #ident: self.#ident.take().ok_or(std::format!("{} is required", std::stringify!(#ident)))?, }
