@@ -234,7 +234,7 @@ fn generate_fn_build(
         });
     }
     let build = quote! {
-        pub fn build(&mut self) -> Result<#original_ident, Box<dyn std::error::Error>> {
+        pub fn build(&mut self) -> std::result::Result<#original_ident, std::boxed::Box<dyn std::error::Error>> {
             Ok(#original_ident {
                 #define_content
             })
