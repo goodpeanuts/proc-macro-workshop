@@ -17,8 +17,17 @@ fn do_expand(ast: &syn::DeriveInput) -> syn::Result<proc_macro2::TokenStream> {
     let fields = get_fields(ast)?;
     let format_string_def = generate_debug_format_string(fields)?;
 
+    let mut generics = ast.generics.clone();
+    generics.params.iter_mut().for_each(|generic| {
+        if let syn::GenericParam::Type(ref mut type_param) = generic {
+            type_param.bounds.push(syn::parse_quote!(std::fmt::Debug));
+        }
+    });
+    let (impl_generics, ty_generics, where_clause) = generics.split_for_impl();
+
+
     let expanded = quote! {
-        impl std::fmt::Debug for #struct_name {
+        impl #impl_generics std::fmt::Debug for #struct_name #ty_generics #where_clause {
             fn fmt(&self, fmt: &mut std::fmt::Formatter) -> std::fmt::Result {
                 fmt.debug_struct(std::stringify!(#struct_name))
                     #format_string_def
