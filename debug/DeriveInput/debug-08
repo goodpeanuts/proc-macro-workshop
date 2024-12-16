@@ -1,0 +1,282 @@
+DeriveInput {
+    attrs: [
+        Attribute {
+            pound_token: Pound,
+            style: AttrStyle::Outer,
+            bracket_token: Bracket,
+            meta: Meta::List {
+                path: Path {
+                    leading_colon: None,
+                    segments: [
+                        PathSegment {
+                            ident: Ident {
+                                ident: "debug",
+                                span: #0 bytes(261..266),
+                            },
+                            arguments: PathArguments::None,
+                        },
+                    ],
+                },
+                delimiter: MacroDelimiter::Paren(
+                    Paren,
+                ),
+                tokens: TokenStream [
+                    Ident {
+                        ident: "bound",
+                        span: #0 bytes(267..272),
+                    },
+                    Punct {
+                        ch: '=',
+                        spacing: Alone,
+                        span: #0 bytes(273..274),
+                    },
+                    Literal {
+                        kind: Str,
+                        symbol: "T::Value: Debug",
+                        suffix: None,
+                        span: #0 bytes(275..292),
+                    },
+                ],
+            },
+        },
+    ],
+    vis: Visibility::Public(
+        Pub,
+    ),
+    ident: Ident {
+        ident: "Wrapper",
+        span: #0 bytes(306..313),
+    },
+    generics: Generics {
+        lt_token: Some(
+            Lt,
+        ),
+        params: [
+            GenericParam::Type(
+                TypeParam {
+                    attrs: [],
+                    ident: Ident {
+                        ident: "T",
+                        span: #0 bytes(314..315),
+                    },
+                    colon_token: Some(
+                        Colon,
+                    ),
+                    bounds: [
+                        TypeParamBound::Trait(
+                            TraitBound {
+                                paren_token: None,
+                                modifier: TraitBoundModifier::None,
+                                lifetimes: None,
+                                path: Path {
+                                    leading_colon: None,
+                                    segments: [
+                                        PathSegment {
+                                            ident: Ident {
+                                                ident: "Trait",
+                                                span: #0 bytes(317..322),
+                                            },
+                                            arguments: PathArguments::None,
+                                        },
+                                    ],
+                                },
+                            },
+                        ),
+                    ],
+                    eq_token: None,
+                    default: None,
+                },
+            ),
+        ],
+        gt_token: Some(
+            Gt,
+        ),
+        where_clause: None,
+    },
+    data: Data::Struct {
+        struct_token: Struct,
+        fields: Fields::Named {
+            brace_token: Brace,
+            named: [
+                Field {
+                    attrs: [],
+                    vis: Visibility::Inherited,
+                    mutability: FieldMutability::None,
+                    ident: Some(
+                        Ident {
+                            ident: "field",
+                            span: #0 bytes(330..335),
+                        },
+                    ),
+                    colon_token: Some(
+                        Colon,
+                    ),
+                    ty: Type::Path {
+                        qself: None,
+                        path: Path {
+                            leading_colon: None,
+                            segments: [
+                                PathSegment {
+                                    ident: Ident {
+                                        ident: "Field",
+                                        span: #0 bytes(337..342),
+                                    },
+                                    arguments: PathArguments::AngleBracketed {
+                                        colon2_token: None,
+                                        lt_token: Lt,
+                                        args: [
+                                            GenericArgument::Type(
+                                                Type::Path {
+                                                    qself: None,
+                                                    path: Path {
+                                                        leading_colon: None,
+                                                        segments: [
+                                                            PathSegment {
+                                                                ident: Ident {
+                                                                    ident: "T",
+                                                                    span: #0 bytes(343..344),
+                                                                },
+                                                                arguments: PathArguments::None,
+                                                            },
+                                                        ],
+                                                    },
+                                                },
+                                            ),
+                                        ],
+                                        gt_token: Gt,
+                                    },
+                                },
+                            ],
+                        },
+                    },
+                },
+                Comma,
+            ],
+        },
+        semi_token: None,
+    },
+}
+DeriveInput {
+    attrs: [],
+    vis: Visibility::Inherited,
+    ident: Ident {
+        ident: "Field",
+        span: #0 bytes(380..385),
+    },
+    generics: Generics {
+        lt_token: Some(
+            Lt,
+        ),
+        params: [
+            GenericParam::Type(
+                TypeParam {
+                    attrs: [],
+                    ident: Ident {
+                        ident: "T",
+                        span: #0 bytes(386..387),
+                    },
+                    colon_token: Some(
+                        Colon,
+                    ),
+                    bounds: [
+                        TypeParamBound::Trait(
+                            TraitBound {
+                                paren_token: None,
+                                modifier: TraitBoundModifier::None,
+                                lifetimes: None,
+                                path: Path {
+                                    leading_colon: None,
+                                    segments: [
+                                        PathSegment {
+                                            ident: Ident {
+                                                ident: "Trait",
+                                                span: #0 bytes(389..394),
+                                            },
+                                            arguments: PathArguments::None,
+                                        },
+                                    ],
+                                },
+                            },
+                        ),
+                    ],
+                    eq_token: None,
+                    default: None,
+                },
+            ),
+        ],
+        gt_token: Some(
+            Gt,
+        ),
+        where_clause: None,
+    },
+    data: Data::Struct {
+        struct_token: Struct,
+        fields: Fields::Named {
+            brace_token: Brace,
+            named: [
+                Field {
+                    attrs: [],
+                    vis: Visibility::Inherited,
+                    mutability: FieldMutability::None,
+                    ident: Some(
+                        Ident {
+                            ident: "values",
+                            span: #0 bytes(402..408),
+                        },
+                    ),
+                    colon_token: Some(
+                        Colon,
+                    ),
+                    ty: Type::Path {
+                        qself: None,
+                        path: Path {
+                            leading_colon: None,
+                            segments: [
+                                PathSegment {
+                                    ident: Ident {
+                                        ident: "Vec",
+                                        span: #0 bytes(410..413),
+                                    },
+                                    arguments: PathArguments::AngleBracketed {
+                                        colon2_token: None,
+                                        lt_token: Lt,
+                                        args: [
+                                            GenericArgument::Type(
+                                                Type::Path {
+                                                    qself: None,
+                                                    path: Path {
+                                                        leading_colon: None,
+                                                        segments: [
+                                                            PathSegment {
+                                                                ident: Ident {
+                                                                    ident: "T",
+                                                                    span: #0 bytes(414..415),
+                                                                },
+                                                                arguments: PathArguments::None,
+                                                            },
+                                                            PathSep,
+                                                            PathSegment {
+                                                                ident: Ident {
+                                                                    ident: "Value",
+                                                                    span: #0 bytes(417..422),
+                                                                },
+                                                                arguments: PathArguments::None,
+                                                            },
+                                                        ],
+                                                    },
+                                                },
+                                            ),
+                                        ],
+                                        gt_token: Gt,
+                                    },
+                                },
+                            ],
+                        },
+                    },
+                },
+                Comma,
+            ],
+        },
+        semi_token: None,
+    },
+}
