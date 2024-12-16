@@ -34,28 +34,46 @@ fn do_expand(ast: &syn::DeriveInput) -> syn::Result<proc_macro2::TokenStream> {
 
     let mut generics = ast.generics.clone();
 
-    generics.params.iter_mut().for_each(|generic| {
-        if let syn::GenericParam::Type(ref mut type_param) = generic {
-            let ty_str = type_param.ident.to_string();
-            if phantomdata_inner_types.contains(&ty_str) && !struct_member_types.contains(&ty_str) {
-            } else if associated_types.contains_key(&ty_str)
-                && !struct_member_types.contains(&ty_str)
-            {
-            } else {
-                type_param.bounds.push(syn::parse_quote!(std::fmt::Debug));
+    if let Some(hatch) = get_struct_escape_hatch(ast) {
+        generics.make_where_clause();
+        generics
+            .where_clause
+            .as_mut()
+            .unwrap()
+            .predicates
+            .push(syn::parse_str(hatch.as_str()).unwrap());
+    } else {
+        generics.params.iter_mut().for_each(|generic| {
+            if let syn::GenericParam::Type(ref mut type_param) = generic {
+                let ty_str = type_param.ident.to_string();
+
+                if phantomdata_inner_types.contains(&ty_str)
+                    && !struct_member_types.contains(&ty_str)
+                {
+                } else if associated_types.contains_key(&ty_str)
+                    && !struct_member_types.contains(&ty_str)
+                {
+                } else {
+                    type_param.bounds.push(syn::parse_quote!(std::fmt::Debug));
+                }
             }
-        }
-    });
+        });
+    }
 
     generics.make_where_clause();
     for (_, associated_types) in &associated_types {
         for associated_type in associated_types {
-            generics.where_clause.as_mut().unwrap().predicates.push(syn::parse_quote!(#associated_type:std::fmt::Debug));
+            generics
+                .where_clause
+                .as_mut()
+                .unwrap()
+                .predicates
+                .push(syn::parse_quote!(#associated_type:std::fmt::Debug));
         }
     }
-    
+
     let (impl_generics, ty_generics, where_clause) = generics.split_for_impl();
-    
+
     let expanded = quote! {
         impl #impl_generics std::fmt::Debug for #struct_name #ty_generics #where_clause {
             fn fmt(&self, fmt: &mut std::fmt::Formatter) -> std::fmt::Result {
@@ -108,6 +126,27 @@ fn get_debug_format_string(field: &syn::Field) -> syn::Result<std::option::Optio
         }
     }
     Ok(None)
+}
+
+fn get_struct_escape_hatch(st: &syn::DeriveInput) -> Option<String> {
+    if let Some(inert_attr) = st.attrs.last() {
+        let mut result = None;
+        _ = inert_attr.parse_nested_meta(|nested| {
+            if nested.path.is_ident("bound") {
+                let value = nested.value()?;
+                let ident: syn::LitStr = value.parse()?;
+                result = Some(ident.value().to_string());
+                return Ok(());
+            } else {
+                return Err(syn::Error::new_spanned(
+                    nested.path,
+                    "only #[bound] is supported",
+                ));
+            }
+        });
+        return result;
+    }
+    None
 }
 
 fn get_phantomdata_innner_generic(field: &syn::Field) -> syn::Result<Option<String>> {
